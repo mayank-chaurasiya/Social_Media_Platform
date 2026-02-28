@@ -3,7 +3,7 @@ import Profile from "../models/profile.model.js";
 import bcrypt from "bcrypt";
 import crypto from "crypto";
 
-export const register = async (req, res) => {
+const register = async (req, res) => {
   try {
     const { name, email, password, username } = req.body;
     if (!name || !email || !password || !username)
@@ -35,7 +35,7 @@ export const register = async (req, res) => {
   }
 };
 
-export const login = async (req, res) => {
+const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
@@ -51,3 +51,28 @@ export const login = async (req, res) => {
     return res.json({ token });
   } catch (error) {}
 };
+
+const uploadProfilePicture = async (req, res) => {
+  const { token } = req.body;
+
+  try {
+    const user = await User.findOne({ token: token });
+    if (!user) return res.status(404).json({ message: "User not found!" });
+
+    user.profilePicture = req.file.filename;
+
+    await user.save();
+    return res.json({ message: "Profile picture updated" });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
+
+const updateUserProfile = async (req, res) => {
+  try {
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
+
+export { register, login, uploadProfilePicture, updateUserProfile };
