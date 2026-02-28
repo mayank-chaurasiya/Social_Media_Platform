@@ -23,3 +23,20 @@ Content-Type: application/json
   "email": "mayank@example.com",
   "password": "pass1234"
 }
+
+### 4) Update Profile Picture
+POST {{baseUrl}}/uploadProfilePicture
+Content-Type: application/json
+
+{
+  "profile_picture" : "file path",
+  "token": "get the token after user login"
+}
+
+### 5) Get User and their profile
+GET {{baseUrl}}/get_user_and_profile
+Content-Type: application/json
+
+{
+  "token": "5d861a4858bf69c66ee8dc3eb0e613584de97a9e49235832391ff3887587f317"
+}
