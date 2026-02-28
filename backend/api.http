@@ -1,0 +1,25 @@
+@baseUrl = http://localhost:9090
+
+### 1) Health check
+GET {{baseUrl}}/
+Accept: application/json
+
+### 2) Register user
+POST {{baseUrl}}/register
+Content-Type: application/json
+
+{
+  "name": "Mayank",
+  "email": "mayank@example.com",
+  "password": "pass1234",
+  "username": "mayank01"
+}
+
+### 3) Login user
+POST {{baseUrl}}/login
+Content-Type: application/json
+
+{
+  "email": "mayank@example.com",
+  "password": "pass1234"
+}
