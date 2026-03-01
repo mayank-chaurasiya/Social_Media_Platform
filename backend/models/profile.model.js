@@ -9,7 +9,7 @@ const educationSchema = new mongoose.Schema({
     type: String,
     default: "",
   },
-  fieldOfStudey: {
+  fieldOfStudy: {
     type: String,
     default: "",
   },

@@ -9,10 +9,10 @@ POST {{baseUrl}}/register
 Content-Type: application/json
 
 {
-  "name": "Mayank",
-  "email": "mayank@example.com",
+  "name": "Khushi",
+  "email": "khushi@example.com",
   "password": "pass1234",
-  "username": "mayank01"
+  "username": "khushi01"
 }
 
 ### 3) Login user
@@ -21,6 +21,15 @@ Content-Type: application/json
 
 {
   "email": "mayank@example.com",
+  "password": "pass1234"
+}
+
+###
+POST {{baseUrl}}/login
+Content-Type: application/json
+
+{
+  "email": "khushi@example.com",
   "password": "pass1234"
 }
 
@@ -38,5 +47,33 @@ GET {{baseUrl}}/get_user_and_profile
 Content-Type: application/json
 
 {
-  "token": "5d861a4858bf69c66ee8dc3eb0e613584de97a9e49235832391ff3887587f317"
+  "token": "20b4f1bf479c23834b2b54d2a4e895b57a8dcf9226b02f43a1356ca5ed1ae93f"
 }
+
+### 6) Update profile data
+POST {{baseUrl}}/update_profile_data
+Content-Type: application/json
+
+{
+  "token": "20b4f1bf479c23834b2b54d2a4e895b57a8dcf9226b02f43a1356ca5ed1ae93f",
+  "bio":"",
+  "currentPost": "CTO",
+  "pastWork": [
+    {
+      "company": "Microsoft",
+      "position": "CTO",
+      "years": "2+"
+    }
+  ],
+  "education": [
+    {
+      "school": "IIMT",
+      "degree": "BCA",
+      "fieldOfStudy": "2023-2026"
+    }
+  ]
+}
+
+### 7) Get All user profiles
+GET {{baseUrl}}/user/get_all_users
+Content-Type: application/json
