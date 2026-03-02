@@ -1,6 +1,7 @@
 import User from "../models/user.model.js";
 import Post from "../models/posts.model.js";
 import Profile from "../models/profile.model.js";
+import Comment from "../models/comments.model.js";
 
 export const activeCheck = async (req, res) => {
   return res.status(200).json({ message: "RUNNING" });
@@ -17,7 +18,7 @@ const createPost = async (req, res) => {
       userId: user._id,
       body: req.body.body,
       media: req.file != undefined ? req.file.filename : "",
-      fileTypes: req.file != undefined ? req.file.mimetype.split("/")[1] : "",
+      fileType: req.file != undefined ? req.file.mimetype.split("/")[1] : "",
     });
 
     await post.save();
@@ -27,4 +28,58 @@ const createPost = async (req, res) => {
   }
 };
 
-export { createPost };
+const getAllPosts = async (req, res) => {
+  try {
+    const posts = await Post.find().populate(
+      "userId",
+      "name username email profilePicture",
+    );
+    return res.json({ posts });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
+
+const deletePost = async (req, res) => {
+  const { token, post_id } = req.body;
+
+  try {
+    const user = await User.findOne({ token: token }).select("_id");
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    const post = await Post.findOne({ _id: post_id });
+    if (!post) return res.status(404).json({ message: "Post not Found" });
+
+    if (post.userId.toString() !== user._id.toString())
+      return res.status(401).json({ message: "Unauthorized" });
+
+    await Post.deleteOne({ _id: post_id });
+    return res.json({ message: "Post deleted" });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
+
+const commentPost = async (req, res) => {
+  const { token, post_id, commentBody } = req.body;
+  try {
+    const user = await User.findOne({ token: token }).select("_id");
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    const post = await Post.findOne({ _id: post_id });
+    if (!post) return res.status(404).json({ message: "Post not found" });
+
+    const comment = new Comment({
+      userId: user._id,
+      postId: post_id,
+      comment: commentBody,
+    });
+
+    await comment.save();
+    return res.status(200).json({ message: "Comment Added" });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
+
+export { createPost, getAllPosts, deletePost, commentPost };
