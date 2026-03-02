@@ -47,7 +47,7 @@ GET {{baseUrl}}/get_user_and_profile
 Content-Type: application/json
 
 {
-  "token": "20b4f1bf479c23834b2b54d2a4e895b57a8dcf9226b02f43a1356ca5ed1ae93f"
+  "token": "5c67daa10e712907813ac6f3c574fa12a5925686112a1b130ba3f28d93647cb9"
 }
 
 ### 6) Update profile data
@@ -55,7 +55,7 @@ POST {{baseUrl}}/update_profile_data
 Content-Type: application/json
 
 {
-  "token": "20b4f1bf479c23834b2b54d2a4e895b57a8dcf9226b02f43a1356ca5ed1ae93f",
+  "token": "5c67daa10e712907813ac6f3c574fa12a5925686112a1b130ba3f28d93647cb9",
   "bio":"",
   "currentPost": "CTO",
   "pastWork": [
