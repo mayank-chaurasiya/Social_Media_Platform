@@ -20,15 +20,6 @@ POST {{baseUrl}}/login
 Content-Type: application/json
 
 {
-  "email": "mayank@example.com",
-  "password": "pass1234"
-}
-
-###
-POST {{baseUrl}}/login
-Content-Type: application/json
-
-{
   "email": "khushi@example.com",
   "password": "pass1234"
 }
@@ -55,7 +46,7 @@ POST {{baseUrl}}/update_profile_data
 Content-Type: application/json
 
 {
-  "token": "5c67daa10e712907813ac6f3c574fa12a5925686112a1b130ba3f28d93647cb9",
+  "token": "d292c22fc98cefcb88e370f0f32c63760c04982ac8410cedc64de79f53a51e55",
   "bio":"",
   "currentPost": "CTO",
   "pastWork": [
