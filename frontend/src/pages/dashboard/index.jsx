@@ -5,6 +5,8 @@ import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import DashboardLayout from "@/layout/DashboardLayout";
+import styles from "./dash.module.css";
+import { BASE_URL } from "@/config";
 
 const Dashboard = () => {
   const router = useRouter();
@@ -25,11 +27,21 @@ const Dashboard = () => {
     }
   }, [authState.isTokenThere]);
 
+  const profilePicture = authState.user?.userId?.profilePicture;
+
   return (
     <UserLayout>
       <DashboardLayout>
-        <div>
-          <h2>Dashboard</h2>
+        <div className={styles.scrollComponent}>
+          <div className={styles.createPostContainer}>
+            {profilePicture && (
+              <img
+                className={styles.profileImg}
+                src={`${BASE_URL}/${profilePicture}`}
+                alt=""
+              />
+            )}
+          </div>
         </div>
       </DashboardLayout>
     </UserLayout>

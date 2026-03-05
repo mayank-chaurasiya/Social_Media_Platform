@@ -23,7 +23,7 @@ export const NavBarComponent = () => {
           {authState.profileFetched && (
             <div>
               <div className={styles.navbarProfile}>
-                <p>Hey, {authState.user.userId.name}</p>
+                <p>Hey, {authState.user?.userId?.name ?? "User"}</p>
                 <p>Profile</p>
                 <button
                   onClick={() => {
