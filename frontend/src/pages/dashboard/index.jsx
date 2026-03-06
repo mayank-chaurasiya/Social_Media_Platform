@@ -1,5 +1,5 @@
 import { getAboutUser, getAllUsers } from "@/config/redux/action/authAction";
-import { getAllPosts } from "@/config/redux/action/postAction";
+import { createPost, getAllPosts } from "@/config/redux/action/postAction";
 import UserLayout from "@/layout/UserLayout";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
@@ -28,6 +28,14 @@ const Dashboard = () => {
   }, [authState.isTokenThere]);
 
   const profilePicture = authState.user?.userId?.profilePicture;
+  const [postContent, setPostContent] = useState("");
+  const [fileContent, setFileContent] = useState();
+
+  const handleUpload = async () => {
+    dispatch(createPost({ file: fileContent, body: postContent }));
+    setPostContent("");
+    setFileContent(null);
+  };
 
   if (authState.user) {
     return (
@@ -45,8 +53,8 @@ const Dashboard = () => {
               <textarea
                 className={styles.textAreaOfContent}
                 placeholder="What's in your mind ?"
-                name=""
-                id=""
+                value={postContent}
+                onChange={(e) => setPostContent(e.target.value)}
               ></textarea>
               <div className={styles.uploadSection}>
                 <label htmlFor="fileUpload">
@@ -65,8 +73,17 @@ const Dashboard = () => {
                     </svg>
                   </div>
                 </label>
-                <input type="file" hidden id="fileUpload" />
-                <div className={styles.uploadBtn}>Upload</div>
+                <input
+                  onChange={(e) => setFileContent(e.target.files[0])}
+                  type="file"
+                  hidden
+                  id="fileUpload"
+                />
+                {postContent.length > 0 && (
+                  <div className={styles.uploadBtn} onClick={handleUpload}>
+                    Post
+                  </div>
+                )}
               </div>
             </div>
           </div>

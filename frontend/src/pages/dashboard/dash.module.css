@@ -29,13 +29,12 @@
   border-radius: 100%;
   display: flex;
   justify-content: center;
-  padding: 5px;
 }
 
 .fab > svg {
   max-width: fit-content;
   min-width: 30px;
-  height: 35px;
+  height: 40px;
 }
 
 .textAreaOfContent {
@@ -52,7 +51,7 @@
 .uploadSection {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 5px;
   padding: 4px;
 }
 
