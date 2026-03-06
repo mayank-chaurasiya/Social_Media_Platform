@@ -38,7 +38,7 @@ GET {{baseUrl}}/get_user_and_profile
 Content-Type: application/json
 
 {
-  "token": "a9b1339ff521f0a09787a4ba957df89274c83c7ab0e4f005adf002fc3545599d"
+  "token": "869f86a2028c48319cad72d2f16e1d634bbb1770c436d16862e71e962864ccfe"
 }
 
 ### 6) Update profile data

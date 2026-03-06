@@ -29,23 +29,59 @@ const Dashboard = () => {
 
   const profilePicture = authState.user?.userId?.profilePicture;
 
-  return (
-    <UserLayout>
-      <DashboardLayout>
-        <div className={styles.scrollComponent}>
-          <div className={styles.createPostContainer}>
-            {profilePicture && (
-              <img
-                className={styles.profileImg}
-                src={`${BASE_URL}/${profilePicture}`}
-                alt=""
-              />
-            )}
+  if (authState.user) {
+    return (
+      <UserLayout>
+        <DashboardLayout>
+          <div className={styles.scrollComponent}>
+            <div className={styles.createPostContainer}>
+              {profilePicture && (
+                <img
+                  className={styles.profileImg}
+                  src={`${BASE_URL}/${profilePicture}`}
+                  alt=""
+                />
+              )}
+              <textarea
+                className={styles.textAreaOfContent}
+                placeholder="What's in your mind ?"
+                name=""
+                id=""
+              ></textarea>
+              <div className={styles.uploadSection}>
+                <label htmlFor="fileUpload">
+                  <div className={styles.fab}>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                      className="size-6"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25ZM12.75 9a.75.75 0 0 0-1.5 0v2.25H9a.75.75 0 0 0 0 1.5h2.25V15a.75.75 0 0 0 1.5 0v-2.25H15a.75.75 0 0 0 0-1.5h-2.25V9Z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </div>
+                </label>
+                <input type="file" hidden id="fileUpload" />
+                <div className={styles.uploadBtn}>Upload</div>
+              </div>
+            </div>
           </div>
-        </div>
-      </DashboardLayout>
-    </UserLayout>
-  );
+        </DashboardLayout>
+      </UserLayout>
+    );
+  } else {
+    return (
+      <UserLayout>
+        <DashboardLayout>
+          <h2>Loading...</h2>
+        </DashboardLayout>
+      </UserLayout>
+    );
+  }
 };
 
 export default Dashboard;
