@@ -15,6 +15,7 @@
   flex-direction: column;
   gap: 1.2rem;
   align-items: start;
+  padding-right: 2rem;
 }
 
 .sideBarOption {
@@ -36,4 +37,8 @@
 .sideBarOption > svg {
   height: 1.4em;
   min-width: fit-content;
+}
+
+.homeContainer__extra {
+  padding-left: 3.5rem;
 }
