@@ -4,6 +4,7 @@ import {
   getAllPosts,
   deletePost,
   incrementPostLike,
+  getAllComments,
 } from "@/config/redux/action/postAction";
 import UserLayout from "@/layout/UserLayout";
 import { useRouter } from "next/router";
@@ -12,6 +13,7 @@ import { useDispatch, useSelector } from "react-redux";
 import DashboardLayout from "@/layout/DashboardLayout";
 import styles from "./dash.module.css";
 import { BASE_URL } from "@/config";
+import { resetPostId } from "@/config/redux/reducer/postReducer";
 
 const Dashboard = () => {
   const router = useRouter();
@@ -171,6 +173,9 @@ const Dashboard = () => {
                             </div>
                             <div
                               className={styles.singleOption__optionsContainer}
+                              onClick={() => {
+                                dispatch(getAllComments({ post_id: post._id }));
+                              }}
                             >
                               <svg
                                 xmlns="http://www.w3.org/2000/svg"
@@ -218,6 +223,21 @@ const Dashboard = () => {
               </div>
             </div>
           </div>
+          {postState.postId !== "" && (
+            <div
+              className={styles.commentsContainer}
+              onClick={() => {
+                dispatch(resetPostId());
+              }}
+            >
+              <div
+                className={styles.allCommentsContainer}
+                onClick={(e) => {
+                  e.stopPropagation();
+                }}
+              ></div>
+            </div>
+          )}
         </DashboardLayout>
       </UserLayout>
     );

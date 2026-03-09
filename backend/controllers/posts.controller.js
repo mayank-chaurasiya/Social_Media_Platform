@@ -83,7 +83,7 @@ const commentPost = async (req, res) => {
 };
 
 const get_comments_by_post = async (req, res) => {
-  const { post_id } = req.body;
+  const { post_id } = req.query;
   try {
     const post = await Post.findOne({ _id: post_id });
     if (!post) return res.status(404).json({ message: "Post not found" });
