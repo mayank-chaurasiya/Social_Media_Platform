@@ -16,6 +16,7 @@
   gap: 1.2rem;
   align-items: start;
   padding-right: 2rem;
+  border-right: 1px solid rgb(222, 222, 222);
 }
 
 .sideBarOption {
@@ -40,5 +41,10 @@
 }
 
 .homeContainer__extra {
-  padding-left: 3.5rem;
+  padding-left: 3rem;
+  border-left: 1px solid rgb(222, 222, 222);
+}
+
+.homeContainer__feed {
+  padding-inline: 1rem;
 }
