@@ -67,3 +67,6 @@ export const getAllUsers = createAsyncThunk(
     }
   },
 );
+
+export const getConnectionsRequest = createAsyncThunk();
+export const sendConnectionRequest = createAsyncThunk();

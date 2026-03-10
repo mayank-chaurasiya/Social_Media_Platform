@@ -20,7 +20,7 @@ POST {{baseUrl}}/login
 Content-Type: application/json
 
 {
-  "email": "khushi@example.com",
+  "email": "mayank@example.com",
   "password": "pass1234"
 }
 
@@ -46,8 +46,8 @@ POST {{baseUrl}}/update_profile_data
 Content-Type: application/json
 
 {
-  "token": "d292c22fc98cefcb88e370f0f32c63760c04982ac8410cedc64de79f53a51e55",
-  "bio":"",
+  "token": "174102672c8f034dcd56580e4a4d3b8b16f404aaf4a73b8b5416bca00c191d1f",
+  "bio":"Hey I Am Khushi, from Greater Noida, I Work in XYZ company",
   "currentPost": "CTO",
   "pastWork": [
     {

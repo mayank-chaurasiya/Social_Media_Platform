@@ -2,12 +2,50 @@ import { BASE_URL, clientServer } from "@/config";
 import DashboardLayout from "@/layout/DashboardLayout";
 import UserLayout from "@/layout/UserLayout";
 import { useSearchParams } from "next/navigation";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import styles from "./userProfile.module.css";
+import { useRouter } from "next/router";
+import { useDispatch, useSelector } from "react-redux";
+import { getAllPosts } from "@/config/redux/action/postAction";
+import {
+  getConnectionsRequest,
+  sendConnectionRequest,
+} from "@/config/redux/action/authAction";
 
 const ViewProfilePage = ({ userProfile }) => {
   const searchParameters = useSearchParams();
-  useEffect(() => {});
+  const dispatch = useDispatch();
+  const router = useRouter();
+  const postReducer = useSelector((state) => state.posts);
+  const authState = useSelector((state) => state.auth);
+  const [userPosts, setUserPosts] = useState([]);
+  const [isCurrentUserInConnection, setIsCurrentUserInConnection] =
+    useState(false);
+
+  const getUserPost = async () => {
+    await dispatch(getAllPosts());
+    await dispatch(
+      getConnectionsRequest({ token: localStorage.getItem("token") }),
+    );
+  };
+
+  useEffect(() => {
+    let post = postReducer.posts.filter((post) => {
+      return post.userId.username === router.query.username;
+    });
+    setUserPosts(post);
+  }, [postReducer.posts]);
+
+  useEffect(() => {
+    console.log(authState.connections, userProfile.userId._id);
+    if (
+      authState.connections.some(
+        (user) => user.connectionId._id === userProfile.userId._id,
+      )
+    ) {
+      setIsCurrentUserInConnection(true);
+    }
+  }, [authState.connections]);
 
   return (
     <UserLayout>
@@ -31,8 +69,50 @@ const ViewProfilePage = ({ userProfile }) => {
                     @{userProfile.userId.username}
                   </p>
                 </div>
+                {isCurrentUserInConnection ? (
+                  <button className={styles.connectedBtn}>CONNECTED</button>
+                ) : (
+                  <button
+                    onClick={() => {
+                      dispatch(
+                        sendConnectionRequest({
+                          token: localStorage.getItem("token"),
+                          user_id: userProfile.userId._id,
+                        }),
+                      );
+                    }}
+                    className={styles.connectBtn}
+                  >
+                    CONNECT
+                  </button>
+                )}
+
+                <div>
+                  <p>{userProfile.bio}</p>
+                </div>
               </div>
-              <div className={styles.profileDetails__rightBar}></div>
+
+              <div className={styles.profileDetails__rightBar}>
+                <h3>Recent Activity</h3>
+                {userPosts.map((post) => {
+                  return (
+                    <div key={post._id} className={styles.postCard}>
+                      <div className={styles.card}>
+                        <div className={styles.card__profileContainer}>
+                          {post.media !== "" ? (
+                            <img src={`${BASE_URL}/${post.media}`} />
+                          ) : (
+                            <div
+                              style={{ width: "3.4rem", height: "3.4rem" }}
+                            ></div>
+                          )}
+                        </div>
+                        <p>{post.body}</p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           </div>
         </div>
