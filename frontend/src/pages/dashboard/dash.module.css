@@ -172,3 +172,73 @@
   position: relative;
   padding: 1.4rem;
 }
+
+.postCommentContainer {
+  position: absolute;
+  bottom: 1.2rem;
+  left: 1.2rem;
+  width: 90%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.2rem;
+}
+
+.postCommentContainer > input {
+  flex: 0.9;
+  padding-inline: 1.5rem;
+  padding-block: 1.2rem;
+  border: none;
+  background-color: rgb(228, 228, 228);
+  border-radius: 10px;
+  outline: none;
+}
+.postCommentContainer > input:focus {
+  border: 1px solid rgb(2, 2, 61);
+}
+
+.postCommentContainer__commentBtn {
+  flex: 0.1;
+  width: fit-content;
+  padding: 1rem;
+  background-color: rgb(4, 4, 74);
+  color: white;
+  text-align: center;
+  position: relative;
+  cursor: pointer;
+  border-radius: 10px;
+}
+
+.postCommentContainer__commentBtn:hover {
+  font-weight: bold;
+  transition: ease-out;
+}
+
+.singleComment__profileContainer {
+  display: flex;
+  align-items: flex-start;
+  gap: 1.2rem;
+  padding: 1.2rem;
+  padding-right: 3.4rem;
+}
+
+.singleComment__body > p:nth-child(1) {
+  font-family: "Bellefair", serif;
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.singleComment__body > p:nth-child(2) {
+  font-family: "Vibur", cursive;
+}
+
+.singleComment__body > p:nth-child(3) {
+  font-family: "Playfair", serif;
+  margin-top: 10px;
+}
+
+.singleComment__profilePic {
+  border-radius: 100%;
+  height: 4.5rem;
+  width: fit-content;
+}

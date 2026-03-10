@@ -188,6 +188,23 @@ const getAllUserProfile = async (req, res) => {
   }
 };
 
+const getUserProfileWithUsername = async (req, res) => {
+  const { username } = req.query;
+  try {
+    const user = await User.findOne({ username });
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    const userProfile = await Profile.findOne({ userId: user._id }).populate(
+      "userId",
+      "name username email profilePicture",
+    );
+
+    return res.json({ profile: userProfile });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
+
 const downloadProfile = async (req, res) => {
   const userId = req.query.id;
   const userProfile = await Profile.findOne({ userId: userId }).populate(
@@ -295,6 +312,7 @@ export {
   getUserAndProfile,
   updateProfileData,
   getAllUserProfile,
+  getUserProfileWithUsername,
   downloadProfile,
   sendConnectionRequest,
   getMyConnectionsRequests,

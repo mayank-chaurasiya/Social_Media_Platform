@@ -1,0 +1,32 @@
+.allUserProfile {
+  max-width: 80%;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.userCard {
+  display: flex;
+  gap: 1.2rem;
+  padding: 1.3rem;
+  align-items: center;
+  box-shadow: 10px 10px 10px 0px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+}
+
+.userCard__image {
+  width: 10%;
+  border-radius: 50%;
+}
+
+.userCard__profileName {
+  font-family: "Bellefair", serif;
+  font-weight: 600;
+  font-size: 1.3rem;
+}
+
+.userCard__profileUsrName {
+  font-family: "Vibur", cursive;
+  font-size: 1.1rem;
+}
