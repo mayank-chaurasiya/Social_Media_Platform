@@ -100,3 +100,35 @@
   cursor: pointer;
   margin: 6px 0 6px 0;
 }
+
+.workHistory {
+  padding-block: 15px;
+  margin-top: 15px;
+}
+
+.workHistory__title {
+  font-family: "Gloock", serif;
+}
+
+.workHistory__container {
+  display: flex;
+  gap: 1.4rem;
+  padding-top: 1.4rem;
+  width: 100%;
+  flex-wrap: wrap;
+}
+
+.workHistory__Card {
+  min-width: fit-content;
+  padding-inline: 2.5rem;
+  padding-block: 1rem;
+  border-radius: 10px;
+  box-shadow: 10px 10px 15px rgb(173, 173, 173);
+}
+
+.workHistory__position {
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}

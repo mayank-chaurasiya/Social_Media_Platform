@@ -129,6 +129,21 @@ const ViewProfilePage = ({ userProfile }) => {
               </div>
             </div>
           </div>
+          <div className={styles.workHistory}>
+            <p className={styles.workHistory__title}>Work History</p>
+            <div className={styles.workHistory__container}>
+              {userProfile.pastWork.map((work, index) => {
+                return (
+                  <div key={index} className={styles.workHistory__Card}>
+                    <p className={styles.workHistory__position}>
+                      {work.company} - {work.position}
+                    </p>
+                    <p>{work.years} years</p>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
         </div>
       </DashboardLayout>
     </UserLayout>
