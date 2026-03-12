@@ -21,6 +21,7 @@ const ViewProfilePage = ({ userProfile }) => {
   const [userPosts, setUserPosts] = useState([]);
   const [isCurrentUserInConnection, setIsCurrentUserInConnection] =
     useState(false);
+  const [isConnectionNull, setIsConnectionNull] = useState(true);
 
   const getUserPost = async () => {
     await dispatch(getAllPosts());
@@ -44,8 +45,19 @@ const ViewProfilePage = ({ userProfile }) => {
       )
     ) {
       setIsCurrentUserInConnection(true);
+      if (
+        authState.connections.find(
+          (user) => user.connectionId._id === userProfile.userId._id,
+        ).status_accepted === true
+      ) {
+        setIsConnectionNull(false);
+      }
     }
   }, [authState.connections]);
+
+  useEffect(() => {
+    getUserPost();
+  }, []);
 
   return (
     <UserLayout>
@@ -70,7 +82,9 @@ const ViewProfilePage = ({ userProfile }) => {
                   </p>
                 </div>
                 {isCurrentUserInConnection ? (
-                  <button className={styles.connectedBtn}>CONNECTED</button>
+                  <button className={styles.connectedBtn}>
+                    {isConnectionNull ? "PENDING" : "CONNECTED"}
+                  </button>
                 ) : (
                   <button
                     onClick={() => {

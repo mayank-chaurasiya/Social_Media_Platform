@@ -2,9 +2,17 @@ import { createSlice } from "@reduxjs/toolkit";
 import {
   getAboutUser,
   getAllUsers,
+  getConnectionsRequest,
+  getMyConnectionsRequests,
   loginUser,
   registerUser,
 } from "../../action/authAction";
+
+const getErrorMessage = (payload) => {
+  if (typeof payload === "string") return payload;
+  if (payload && typeof payload.message === "string") return payload.message;
+  return "Something went wrong";
+};
 
 const initialState = {
   user: null,
@@ -55,7 +63,7 @@ const authSlice = createSlice({
       .addCase(loginUser.rejected, (state, action) => {
         state.isLoading = false;
         state.isError = true;
-        state.message = action.payload;
+        state.message = getErrorMessage(action.payload);
       })
       .addCase(registerUser.pending, (state) => {
         state.isLoading = true;
@@ -65,14 +73,12 @@ const authSlice = createSlice({
         state.isLoading = false;
         state.isError = false;
         state.isSuccess = true;
-        state.message = {
-          message: "Registered successful, Please Log in !",
-        };
+        state.message = "Registered successful, Please Log in !";
       })
       .addCase(registerUser.rejected, (state, action) => {
         state.isLoading = false;
         state.isError = true;
-        state.message = action.payload;
+        state.message = getErrorMessage(action.payload);
       })
       .addCase(getAboutUser.fulfilled, (state, action) => {
         state.isLoading = false;
@@ -85,6 +91,18 @@ const authSlice = createSlice({
         state.isError = false;
         state.all_profiles_fetched = true;
         state.all_users = action.payload.profiles;
+      })
+      .addCase(getConnectionsRequest.fulfilled, (state, action) => {
+        state.connections = action.payload;
+      })
+      .addCase(getConnectionsRequest.rejected, (state, action) => {
+        state.message = getErrorMessage(action.payload);
+      })
+      .addCase(getMyConnectionsRequests.fulfilled, (state, action) => {
+        state.connectionRequest = action.payload;
+      })
+      .addCase(getMyConnectionsRequests.rejected, (state, action) => {
+        state.message = getErrorMessage(action.payload);
       });
   },
 });

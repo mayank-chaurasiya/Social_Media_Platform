@@ -59,7 +59,7 @@ const LoginComponent = () => {
               {userLoginMethod ? "Sign In" : "Sign up"}
             </p>
             <p style={{ color: authState.isError ? "red" : "green" }}>
-              {authState.message.message}
+              {authState.message}
             </p>
             <div className={styles.inputContainers}>
               {!userLoginMethod && (
@@ -107,7 +107,7 @@ const LoginComponent = () => {
           </div>
           <div className={styles.cardContainer__right}>
             {userLoginMethod ? (
-              <p>Don't Have an Account ?</p>
+              <p>Don&apos;t Have an Account ?</p>
             ) : (
               <p>Already Have an Account ?</p>
             )}

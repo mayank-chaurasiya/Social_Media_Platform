@@ -19,7 +19,9 @@ export const loginUser = createAsyncThunk(
       }
       return thunkAPI.fulfillWithValue(response.data.token);
     } catch (error) {
-      return thunkAPI.rejectWithValue(error.response.data);
+      return thunkAPI.rejectWithValue(
+        error.response?.data?.message || error.message || "Unable to login",
+      );
     }
   },
 );
@@ -35,7 +37,11 @@ export const registerUser = createAsyncThunk(
         password: user.password,
       });
     } catch (error) {
-      return thunkAPI.rejectWithValue(error.response.data);
+      return thunkAPI.rejectWithValue(
+        error.response?.data?.message ||
+          error.message ||
+          "Unable to register user",
+      );
     }
   },
 );
@@ -51,7 +57,11 @@ export const getAboutUser = createAsyncThunk(
       });
       return thunkAPI.fulfillWithValue(response.data);
     } catch (error) {
-      return thunkAPI.rejectWithValue(error.response.data);
+      return thunkAPI.rejectWithValue(
+        error.response?.data || {
+          message: error.message || "Unable to fetch user profile",
+        },
+      );
     }
   },
 );
@@ -63,17 +73,97 @@ export const getAllUsers = createAsyncThunk(
       const response = await clientServer.get("/user/get_all_users");
       return thunkAPI.fulfillWithValue(response.data);
     } catch (error) {
-      return thunkAPI.rejectWithValue(error.response.data);
+      return thunkAPI.rejectWithValue(
+        error.response?.data || {
+          message: error.message || "Unable to fetch all users",
+        },
+      );
     }
   },
 );
-
-export const getConnectionsRequest = createAsyncThunk();
 
 export const sendConnectionRequest = createAsyncThunk(
   "user/sendConnectionRequest",
   async (user, thunkAPI) => {
     try {
-    } catch (error) {}
+      const response = await clientServer.post(
+        "/user/send_connection_request",
+        {
+          token: user.token,
+          connectionId: user.user_id,
+        },
+      );
+      thunkAPI.dispatch(getConnectionsRequest({ token: user.token }));
+      return thunkAPI.fulfillWithValue(response.data);
+    } catch (error) {
+      return thunkAPI.rejectWithValue(
+        error.response?.data?.message ||
+          error.message ||
+          "Unable to send connection request",
+      );
+    }
+  },
+);
+
+export const getConnectionsRequest = createAsyncThunk(
+  "user/getConnectionsRequest",
+  async (user, thunkAPI) => {
+    try {
+      const response = await clientServer.get("/user/get_connection_requests", {
+        params: {
+          token: user.token,
+        },
+      });
+      return thunkAPI.fulfillWithValue(response.data.connections);
+    } catch (error) {
+      return thunkAPI.rejectWithValue(
+        error.response?.data?.message ||
+          error.message ||
+          "Unable to fetch connection requests",
+      );
+    }
+  },
+);
+
+export const getMyConnectionsRequests = createAsyncThunk(
+  "user/getMyConnectionRequests",
+  async (user, thunkAPI) => {
+    try {
+      const response = await clientServer.get("/user/user_connection_request", {
+        params: {
+          token: user.token,
+        },
+      });
+      return thunkAPI.fulfillWithValue(response.data.connections);
+    } catch (error) {
+      return thunkAPI.rejectWithValue(
+        error.response?.data?.message ||
+          error.message ||
+          "Unable to fetch your connections",
+      );
+    }
+  },
+);
+
+export const acceptConnection = createAsyncThunk(
+  "user/acceptConnections",
+  async (user, thunkAPI) => {
+    try {
+      const response = await clientServer.post(
+        "/user/accept_connection_request",
+        {
+          token: user.token,
+          connection_id: user.connectionId,
+          action_type: user.action,
+        },
+      );
+      return thunkAPI.fulfillWithValue(response.data);
+    } catch (error) {
+      return thunkAPI.rejectWithValue(
+        error.response?.data?.message ||
+          error.message ||
+          "Unable to update connection request",
+      );
+    }
   },
 );

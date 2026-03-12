@@ -249,8 +249,12 @@ const sendConnectionRequest = async (req, res) => {
 };
 
 const getMyConnectionsRequests = async (req, res) => {
-  const { token } = req.body;
+  const token = req.query?.token || req.body?.token;
   try {
+    if (!token) {
+      return res.status(400).json({ message: "Token is required" });
+    }
+
     const user = await User.findOne({ token });
     if (!user) return res.status(404).json({ message: "User not found" });
 
@@ -260,14 +264,18 @@ const getMyConnectionsRequests = async (req, res) => {
 
     return res.json({ connections });
   } catch (error) {
-    res.status(404).json({ message: error.message });
+    res.status(500).json({ message: error.message });
   }
 };
 
 const whatAreMyConnections = async (req, res) => {
-  const { token } = req.body;
+  const token = req.query?.token || req.body?.token;
 
   try {
+    if (!token) {
+      return res.status(400).json({ message: "Token is required" });
+    }
+
     const user = await User.findOne({ token });
     if (!user) return res.status(404).json({ message: "User not found" });
 
@@ -277,7 +285,7 @@ const whatAreMyConnections = async (req, res) => {
 
     return res.json(connections);
   } catch (error) {
-    res.status(404).json({ message: error.message });
+    res.status(500).json({ message: error.message });
   }
 };
 
