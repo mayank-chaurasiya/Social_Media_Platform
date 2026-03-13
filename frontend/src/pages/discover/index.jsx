@@ -43,7 +43,7 @@ const DiscoverPage = () => {
                         {user.userId.name}
                       </p>
                       <p className={styles.userCard__profileUsrName}>
-                        {user.userId.username}
+                        @{user.userId.username}
                       </p>
                     </div>
                   </div>

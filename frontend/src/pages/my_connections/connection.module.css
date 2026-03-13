@@ -1,0 +1,82 @@
+.myConnections__section {
+  padding: 2rem;
+}
+
+.heading {
+  font-family: "Gloock", serif;
+  font-size: 2rem;
+}
+
+.empty__connections {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.empty__connections > p:nth-child(1) {
+  font-family: "Gloock", serif;
+  font-size: 1.6rem;
+  color: rgb(199, 7, 7);
+  margin-top: 3rem;
+}
+
+.userCard {
+  padding: 2rem;
+  display: flex;
+  width: 90%;
+  gap: 1.2rem;
+  align-items: center;
+  box-shadow: 10px 10px 10px 0px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+}
+
+.userCard__details {
+  display: flex;
+  width: 100%;
+  flex: 1;
+  align-items: center;
+  gap: 1.2rem;
+}
+
+.userCard__info {
+  min-width: 0;
+}
+
+.accept_Btn {
+  margin-left: auto;
+}
+
+.userCard__profilePicture > img {
+  width: 6.5rem;
+  border-radius: 50%;
+}
+
+.userCard__name {
+  font-family: "Bellefair", serif;
+  font-weight: 600;
+  font-size: 1.3rem;
+}
+
+.userCard__userName {
+  font-family: "Vibur", cursive;
+  font-size: 1.1rem;
+}
+
+.accept_Btn > button {
+  padding-inline: 0.9rem;
+  padding-block: 0.6rem;
+  background: rgb(4, 4, 69);
+  color: white;
+  border: none;
+  outline: none;
+  border-radius: 10px;
+  cursor: pointer;
+  margin: 6px 0 6px 0;
+  font-weight: 500;
+}
+
+.myNetwork__section {
+  padding: 2rem;
+  margin-top: 30px;
+}

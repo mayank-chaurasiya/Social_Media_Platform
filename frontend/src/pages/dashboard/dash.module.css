@@ -30,6 +30,16 @@
   width: fit-content;
 }
 
+.profileName {
+  font-family: "Bellefair", serif;
+  font-weight: 600;
+  font-size: 1.3rem;
+}
+
+.userName {
+  font-size: 1.1rem;
+}
+
 .createPostContainer > textarea {
   width: 100%;
 }

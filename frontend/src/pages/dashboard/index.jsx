@@ -115,7 +115,9 @@ const Dashboard = () => {
                         />
                         <div className={styles.profileContainer__name}>
                           <div className={styles.profileHeader}>
-                            <p>{post.userId.name}</p>
+                            <p className={styles.profileName}>
+                              {post.userId.name}
+                            </p>
 
                             {post.userId._id === authState.user.userId._id && (
                               <div
@@ -148,7 +150,9 @@ const Dashboard = () => {
                               </div>
                             )}
                           </div>
-                          <p>@{post.userId.username}</p>
+                          <p className={styles.userName}>
+                            @{post.userId.username}
+                          </p>
                           <p>{post.body}</p>
                           <div className={styles.singleCard__image}>
                             <img src={`${BASE_URL}/${post.media}`} alt="" />

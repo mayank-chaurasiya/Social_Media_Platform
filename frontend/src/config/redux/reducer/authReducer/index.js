@@ -1,5 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 import {
+  acceptConnection,
   getAboutUser,
   getAllUsers,
   getConnectionsRequest,
@@ -102,6 +103,19 @@ const authSlice = createSlice({
         state.connectionRequest = action.payload;
       })
       .addCase(getMyConnectionsRequests.rejected, (state, action) => {
+        state.message = getErrorMessage(action.payload);
+      })
+      .addCase(acceptConnection.fulfilled, (state, action) => {
+        state.connectionRequest = state.connectionRequest.map((connection) =>
+          connection._id === action.payload.requestId
+            ? {
+                ...connection,
+                status_accepted: action.payload.actionType === "accept",
+              }
+            : connection,
+        );
+      })
+      .addCase(acceptConnection.rejected, (state, action) => {
         state.message = getErrorMessage(action.payload);
       });
   },
