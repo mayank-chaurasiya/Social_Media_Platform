@@ -24,6 +24,20 @@
   text-align: center;
 }
 
+.profile__btns {
+  display: flex;
+  align-items: center;
+  gap: 1.6rem;
+}
+
+.download__Button {
+  cursor: pointer;
+}
+
+.download__Button > svg {
+  width: 1.2rem;
+}
+
 .profileContainer__details {
   padding-top: 6.6rem;
 }
