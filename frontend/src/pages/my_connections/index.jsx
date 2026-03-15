@@ -5,6 +5,7 @@ import styles from "./connection.module.css";
 import { useDispatch, useSelector } from "react-redux";
 import {
   acceptConnection,
+  getConnectionsRequest,
   getMyConnectionsRequests,
 } from "@/config/redux/action/authAction";
 import { BASE_URL } from "@/config";
@@ -17,14 +18,26 @@ const MyConnectionsPage = () => {
   const pendingRequests = authState.connectionRequest.filter(
     (connection) => connection.status_accepted === null,
   );
-  const acceptedConnections = authState.connectionRequest.filter(
-    (connection) => connection.status_accepted === true,
-  );
+  const acceptedConnections = [
+    ...authState.connectionRequest
+      .filter((connection) => connection.status_accepted === true)
+      .map((connection) => ({
+        ...connection,
+        networkUser: connection.userId,
+      })),
+    ...authState.connections
+      .filter((connection) => connection.status_accepted === true)
+      .map((connection) => ({
+        ...connection,
+        networkUser: connection.connectionId,
+      })),
+  ];
 
   useEffect(() => {
-    dispatch(
-      getMyConnectionsRequests({ token: localStorage.getItem("token") }),
-    );
+    const token = localStorage.getItem("token");
+
+    dispatch(getMyConnectionsRequests({ token }));
+    dispatch(getConnectionsRequest({ token }));
   }, [dispatch]);
   return (
     <UserLayout>
@@ -89,7 +102,7 @@ const MyConnectionsPage = () => {
               return (
                 <div
                   onClick={() => {
-                    router.push(`/view_profile/${user.userId.username}`);
+                    router.push(`/view_profile/${user.networkUser.username}`);
                   }}
                   className={styles.userCard}
                   key={user._id}
@@ -97,14 +110,16 @@ const MyConnectionsPage = () => {
                   <div className={styles.userCard__details}>
                     <div className={styles.userCard__profilePicture}>
                       <img
-                        src={`${BASE_URL}/${user.userId.profilePicture}`}
+                        src={`${BASE_URL}/${user.networkUser.profilePicture}`}
                         alt=""
                       />
                     </div>
                     <div className={styles.userCard__info}>
-                      <p className={styles.userCard__name}>{user.userId.name}</p>
+                      <p className={styles.userCard__name}>
+                        {user.networkUser.name}
+                      </p>
                       <p className={styles.userCard__userName}>
-                        @{user.userId.username}
+                        @{user.networkUser.username}
                       </p>
                     </div>
                   </div>

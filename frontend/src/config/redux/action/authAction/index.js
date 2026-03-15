@@ -1,6 +1,11 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { clientServer } from "@/config";
 
+const refreshConnectionState = (dispatch, token) => {
+  dispatch(getConnectionsRequest({ token }));
+  dispatch(getMyConnectionsRequests({ token }));
+};
+
 export const loginUser = createAsyncThunk(
   "user/login",
   async (user, thunkAPI) => {
@@ -102,7 +107,7 @@ export const sendConnectionRequest = createAsyncThunk(
           connectionId: user.user_id,
         },
       );
-      thunkAPI.dispatch(getConnectionsRequest({ token: user.token }));
+      refreshConnectionState(thunkAPI.dispatch, user.token);
       return thunkAPI.fulfillWithValue(response.data);
     } catch (error) {
       return thunkAPI.rejectWithValue(
@@ -166,7 +171,7 @@ export const acceptConnection = createAsyncThunk(
           action_type: user.action,
         },
       );
-      thunkAPI.dispatch(getMyConnectionsRequests({ token: user.token }));
+      refreshConnectionState(thunkAPI.dispatch, user.token);
       return thunkAPI.fulfillWithValue({
         ...response.data,
         requestId: user.connectionId,

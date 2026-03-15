@@ -11,10 +11,16 @@ const DiscoverPage = () => {
   const authState = useSelector((state) => state.auth);
   const dispatch = useDispatch();
   const router = useRouter();
+  const currentUsername = authState.user?.userId?.username;
+  const discoverProfiles = authState.all_users.filter(
+    (user) => user.userId?.username !== currentUsername,
+  );
 
   useEffect(() => {
-    dispatch(getAllUsers());
-  }, [dispatch]);
+    if (!authState.all_profiles_fetched) {
+      dispatch(getAllUsers());
+    }
+  }, [authState.all_profiles_fetched, dispatch]);
 
   return (
     <UserLayout>
@@ -23,7 +29,7 @@ const DiscoverPage = () => {
           <h2>Discover Page</h2>
           <div className={styles.allUserProfile}>
             {authState.all_profiles_fetched &&
-              authState.all_users.map((user) => {
+              discoverProfiles.map((user) => {
                 return (
                   <div
                     onClick={() => {

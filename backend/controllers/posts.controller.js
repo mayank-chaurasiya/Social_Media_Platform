@@ -120,15 +120,40 @@ const delete_comment_of_user = async (req, res) => {
 };
 
 const increment_likes = async (req, res) => {
-  const { post_id } = req.body;
+  const { post_id, token } = req.body;
 
   try {
-    const post = await Post.findOne({ _id: post_id });
-    if (!post) return res.status(404).json({ message: "Post not found" });
+    const user = await User.findOne({ token }).select("_id");
+    if (!user) return res.status(404).json({ message: "User not found" });
 
-    post.likes = post.likes + 1;
-    await post.save();
-    return res.json({ message: "Likes incremented" });
+    const updatedPost = await Post.findOneAndUpdate(
+      {
+        _id: post_id,
+        likedBy: { $ne: user._id },
+      },
+      {
+        $inc: { likes: 1 },
+        $push: { likedBy: user._id },
+      },
+      { new: true },
+    );
+
+    if (!updatedPost) {
+      const post = await Post.findOne({ _id: post_id }).select("likes");
+      if (!post) return res.status(404).json({ message: "Post not found" });
+
+      return res.json({
+        message: "Post already liked",
+        alreadyLiked: true,
+        likes: post.likes,
+      });
+    }
+
+    return res.json({
+      message: "Likes incremented",
+      alreadyLiked: false,
+      likes: updatedPost.likes,
+    });
   } catch (error) {
     return res.status(500).json({ message: error.message });
   }

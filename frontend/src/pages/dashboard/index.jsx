@@ -107,6 +107,11 @@ const Dashboard = () => {
                   const postProfilePicture = post.userId?.profilePicture
                     ? `${BASE_URL}/${post.userId.profilePicture}`
                     : "";
+                  const hasLikedPost = (post.likedBy ?? []).some(
+                    (likedUserId) =>
+                      String(likedUserId) ===
+                      String(authState.user?.userId?._id ?? ""),
+                  );
 
                   return (
                     <div key={post._id} className={styles.singleCard}>
@@ -164,10 +169,15 @@ const Dashboard = () => {
                             <div
                               className={styles.singleOption__optionsContainer}
                               onClick={async () => {
+                                if (hasLikedPost) return;
                                 await dispatch(
                                   incrementPostLike({ post_id: post._id }),
                                 );
                                 dispatch(getAllPosts());
+                              }}
+                              style={{
+                                opacity: hasLikedPost ? 0.6 : 1,
+                                cursor: hasLikedPost ? "not-allowed" : "pointer",
                               }}
                             >
                               <svg

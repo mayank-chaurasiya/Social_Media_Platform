@@ -4,18 +4,40 @@ import { useRouter } from "next/router";
 import { setTokenIsThere } from "@/config/redux/reducer/authReducer";
 import { useDispatch, useSelector } from "react-redux";
 import { BASE_URL } from "@/config";
+import { getAboutUser, getAllUsers } from "@/config/redux/action/authAction";
 
 const DashboardLayout = ({ children }) => {
   const router = useRouter();
   const dispatch = useDispatch();
   const authState = useSelector((state) => state.auth);
+  const currentUsername = authState.user?.userId?.username;
+  const visibleProfiles = authState.all_users.filter(
+    (profile) => profile.userId?.username !== currentUsername,
+  );
 
   useEffect(() => {
-    if (localStorage.getItem("token") === null) {
+    const token = localStorage.getItem("token");
+
+    if (token === null) {
       router.push("/login");
+      return;
     }
+
     dispatch(setTokenIsThere());
-  });
+
+    if (!authState.profileFetched) {
+      dispatch(getAboutUser({ token }));
+    }
+
+    if (!authState.all_profiles_fetched) {
+      dispatch(getAllUsers());
+    }
+  }, [
+    authState.all_profiles_fetched,
+    authState.profileFetched,
+    dispatch,
+    router,
+  ]);
 
   return (
     <div>
@@ -84,7 +106,7 @@ const DashboardLayout = ({ children }) => {
           <div className={styles.homeContainer__extra}>
             <h3 className={styles.extraContainer__title}>Top Profiles</h3>
             {authState.all_profiles_fetched &&
-              authState.all_users.map((profile) => {
+              visibleProfiles.map((profile) => {
                 return (
                   <div
                     key={profile._id}
