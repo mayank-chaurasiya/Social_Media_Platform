@@ -1,16 +1,57 @@
 import DashboardLayout from "@/layout/DashboardLayout";
 import UserLayout from "@/layout/UserLayout";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import styles from "./profile.module.css";
 import { useDispatch, useSelector } from "react-redux";
 import { BASE_URL, clientServer } from "@/config";
 import { getAboutUser } from "@/config/redux/action/authAction";
 import { getAllPosts } from "@/config/redux/action/postAction";
 
+const PROFILE_SECTION_TEMPLATES = {
+  pastWork: {
+    company: "",
+    position: "",
+    years: "",
+  },
+  education: {
+    school: "",
+    degree: "",
+    fieldOfStudy: "",
+  },
+};
+
+const COLLECTION_FIELDS = {
+  pastWork: ["company", "position", "years"],
+  education: ["school", "degree", "fieldOfStudy"],
+};
+
+const sanitizeTextValue = (value) =>
+  typeof value === "string" ? value.trim() : "";
+
+const sanitizeCollectionItems = (items, section) =>
+  (items ?? [])
+    .map((item) => {
+      const normalizedItem = COLLECTION_FIELDS[section].reduce(
+        (accumulator, field) => ({
+          ...accumulator,
+          [field]: sanitizeTextValue(item?.[field]),
+        }),
+        item?._id ? { _id: item._id } : {},
+      );
+
+      return normalizedItem;
+    })
+    .filter((item) =>
+      COLLECTION_FIELDS[section].some((field) => item[field] !== ""),
+    );
+
 const ProfilePage = () => {
   const authState = useSelector((state) => state.auth);
   const postState = useSelector((state) => state.posts);
   const dispatch = useDispatch();
+  const [draftProfile, setDraftProfile] = useState(null);
+  const [isSavingProfile, setIsSavingProfile] = useState(false);
+  const originalProfile = authState.user;
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -20,12 +61,41 @@ const ProfilePage = () => {
     dispatch(getAllPosts());
   }, [dispatch]);
 
-  const userProfile = authState.user;
-  const profileUser = userProfile?.userId;
+  useEffect(() => {
+    setDraftProfile(authState.user);
+  }, [authState.user]);
+
+  const profileUser = draftProfile?.userId;
+  const profileName = profileUser?.name ?? "";
+  const profileBio = draftProfile?.bio ?? "";
   const userPosts = postState.posts.filter(
     (post) => post.userId?._id === profileUser?._id,
   );
-  const pastWork = userProfile?.pastWork ?? [];
+  const pastWork = draftProfile?.pastWork ?? [];
+  const education = draftProfile?.education ?? [];
+  const sanitizedBio = sanitizeTextValue(profileBio);
+  const sanitizedPastWork = sanitizeCollectionItems(pastWork, "pastWork");
+  const sanitizedEducation = sanitizeCollectionItems(education, "education");
+  const hasNameChanged = profileName !== (originalProfile?.userId?.name ?? "");
+  const hasProfileFieldsChanged =
+    JSON.stringify({
+      bio: sanitizedBio,
+      pastWork: sanitizedPastWork,
+      education: sanitizedEducation,
+    }) !==
+    JSON.stringify({
+      bio: sanitizeTextValue(originalProfile?.bio ?? ""),
+      pastWork: sanitizeCollectionItems(
+        originalProfile?.pastWork ?? [],
+        "pastWork",
+      ),
+      education: sanitizeCollectionItems(
+        originalProfile?.education ?? [],
+        "education",
+      ),
+    });
+  const hasPendingChanges =
+    Boolean(draftProfile) && (hasNameChanged || hasProfileFieldsChanged);
 
   if (!profileUser) {
     return (
@@ -36,20 +106,91 @@ const ProfilePage = () => {
   }
 
   const updateProfilePicture = async (file) => {
+    if (!file) return;
+
     const formData = new FormData();
     formData.append("profile_picture", file);
     formData.append("token", localStorage.getItem("token"));
 
-    const response = await clientServer.post(
-      "/update_profile_picture",
-      formData,
-      {
-        header: {
-          "Content-Type": "multipart/form-data",
-        },
+    await clientServer.post("/update_profile_picture", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
       },
-    );
+    });
     dispatch(getAboutUser({ token: localStorage.getItem("token") }));
+  };
+
+  const updateProfileData = (profileUpdater) => {
+    setDraftProfile((currentProfile) => {
+      if (!currentProfile) return currentProfile;
+
+      return profileUpdater(currentProfile);
+    });
+  };
+
+  const updateCollectionItem = (section, index, field, value) => {
+    updateProfileData((currentProfile) => ({
+      ...currentProfile,
+      [section]: (currentProfile[section] ?? []).map((item, itemIndex) =>
+        itemIndex === index ? { ...item, [field]: value } : item,
+      ),
+    }));
+  };
+
+  const addCollectionItem = (section) => {
+    updateProfileData((currentProfile) => ({
+      ...currentProfile,
+      [section]: [
+        ...(currentProfile[section] ?? []),
+        { ...PROFILE_SECTION_TEMPLATES[section] },
+      ],
+    }));
+  };
+
+  const removeCollectionItem = (section, index) => {
+    updateProfileData((currentProfile) => ({
+      ...currentProfile,
+      [section]: (currentProfile[section] ?? []).filter(
+        (_, itemIndex) => itemIndex !== index,
+      ),
+    }));
+  };
+
+  const saveProfileChanges = async () => {
+    const token = localStorage.getItem("token");
+    if (!token || !profileUser || !hasPendingChanges) return;
+
+    try {
+      setIsSavingProfile(true);
+      const requests = [];
+
+      if (hasNameChanged) {
+        requests.push(
+          clientServer.post("/user_update", {
+            token,
+            name: profileName,
+          }),
+        );
+      }
+
+      if (hasProfileFieldsChanged) {
+        requests.push(
+          clientServer.post("/update_profile_data", {
+            token,
+            bio: sanitizedBio,
+            pastWork: sanitizedPastWork,
+            education: sanitizedEducation,
+          }),
+        );
+      }
+
+      await Promise.all(requests);
+      await dispatch(getAboutUser({ token }));
+    } catch (error) {
+      console.error("Unable to update profile", error);
+    } finally {
+      setIsSavingProfile(false);
+    }
   };
 
   return (
@@ -62,7 +203,7 @@ const ProfilePage = () => {
               htmlFor="profilePictureUpload"
             >
               <p>
-                <i class="fa-regular fa-pen-to-square"></i>&nbsp;Edit
+                <i className="fa-regular fa-pen-to-square"></i>&nbsp;Edit
               </p>
             </label>
             <input
@@ -83,14 +224,44 @@ const ProfilePage = () => {
             <div className={styles.profileDetails__parent}>
               <div className={styles.profileDetails__leftBar}>
                 <div className={styles.leftBar}>
-                  <p className={styles.profile__name}>{profileUser.name}</p>
+                  <input
+                    type="text"
+                    className={styles.name__edit}
+                    value={profileName}
+                    size={Math.max(profileName.length, 1)}
+                    onChange={(e) => {
+                      updateProfileData((currentProfile) => ({
+                        ...currentProfile,
+                        userId: {
+                          ...currentProfile.userId,
+                          name: e.target.value,
+                        },
+                      }));
+                    }}
+                  />
+
                   <p className={styles.profile__username}>
                     @{profileUser.username}
                   </p>
                 </div>
 
-                <div>
-                  <p>{userProfile.bio}</p>
+                <div className={styles.profileEditor}>
+                  <label className={styles.fieldLabel} htmlFor="profileBio">
+                    Bio
+                  </label>
+                  <textarea
+                    id="profileBio"
+                    className={styles.profileTextarea}
+                    rows={Math.max(3, Math.ceil(profileBio.length / 80))}
+                    placeholder="Write a short introduction about yourself."
+                    value={profileBio}
+                    onChange={(e) => {
+                      updateProfileData((currentProfile) => ({
+                        ...currentProfile,
+                        bio: e.target.value,
+                      }));
+                    }}
+                  />
                 </div>
               </div>
 
@@ -120,21 +291,255 @@ const ProfilePage = () => {
               </div>
             </div>
           </div>
-          <div className={styles.workHistory}>
-            <p className={styles.workHistory__title}>Work History</p>
-            <div className={styles.workHistory__container}>
-              {pastWork.map((work, index) => {
-                return (
-                  <div key={index} className={styles.workHistory__Card}>
-                    <p className={styles.workHistory__position}>
-                      {work.company} - {work.position}
-                    </p>
-                    <p>{work.years} years</p>
-                  </div>
-                );
-              })}
+          <div className={styles.editorSection}>
+            <div className={styles.sectionHeader}>
+              <div>
+                <p className={styles.workHistory__title}>Work History</p>
+                <p className={styles.sectionSubtitle}>
+                  Add and refine the roles you want to highlight.
+                </p>
+              </div>
+              <button
+                type="button"
+                className={styles.sectionAction}
+                onClick={() => addCollectionItem("pastWork")}
+              >
+                Add Work
+              </button>
             </div>
+
+            {pastWork.length === 0 ? (
+              <div className={styles.emptyState}>
+                No work history yet. Add your first experience.
+              </div>
+            ) : (
+              <div className={styles.editorGrid}>
+                {pastWork.map((work, index) => {
+                  return (
+                    <div
+                      key={work._id ?? `work-${index}`}
+                      className={styles.editorCard}
+                    >
+                      <div className={styles.editorCardHeader}>
+                        <p className={styles.editorCardTitle}>
+                          Work #{index + 1}
+                        </p>
+                        <button
+                          type="button"
+                          className={styles.deleteAction}
+                          onClick={() =>
+                            removeCollectionItem("pastWork", index)
+                          }
+                        >
+                          Delete
+                        </button>
+                      </div>
+
+                      <div className={styles.fieldGroup}>
+                        <label
+                          className={styles.fieldLabel}
+                          htmlFor={`company-${index}`}
+                        >
+                          Company
+                        </label>
+                        <input
+                          id={`company-${index}`}
+                          type="text"
+                          className={styles.fieldInput}
+                          value={work.company ?? ""}
+                          onChange={(e) => {
+                            updateCollectionItem(
+                              "pastWork",
+                              index,
+                              "company",
+                              e.target.value,
+                            );
+                          }}
+                        />
+                      </div>
+
+                      <div className={styles.fieldGroup}>
+                        <label
+                          className={styles.fieldLabel}
+                          htmlFor={`position-${index}`}
+                        >
+                          Position
+                        </label>
+                        <input
+                          id={`position-${index}`}
+                          type="text"
+                          className={styles.fieldInput}
+                          value={work.position ?? ""}
+                          onChange={(e) => {
+                            updateCollectionItem(
+                              "pastWork",
+                              index,
+                              "position",
+                              e.target.value,
+                            );
+                          }}
+                        />
+                      </div>
+
+                      <div className={styles.fieldGroup}>
+                        <label
+                          className={styles.fieldLabel}
+                          htmlFor={`years-${index}`}
+                        >
+                          Duration
+                        </label>
+                        <input
+                          id={`years-${index}`}
+                          type="text"
+                          className={styles.fieldInput}
+                          value={work.years ?? ""}
+                          placeholder="e.g. 2 years"
+                          onChange={(e) => {
+                            updateCollectionItem(
+                              "pastWork",
+                              index,
+                              "years",
+                              e.target.value,
+                            );
+                          }}
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
+
+          <div className={styles.editorSection}>
+            <div className={styles.sectionHeader}>
+              <div>
+                <p className={styles.workHistory__title}>Education</p>
+                <p className={styles.sectionSubtitle}>
+                  Capture the schools and programs that shaped your journey.
+                </p>
+              </div>
+              <button
+                type="button"
+                className={styles.sectionAction}
+                onClick={() => addCollectionItem("education")}
+              >
+                Add Education
+              </button>
+            </div>
+
+            {education.length === 0 ? (
+              <div className={styles.emptyState}>
+                No education added yet. Start with your latest course or degree.
+              </div>
+            ) : (
+              <div className={styles.editorGrid}>
+                {education.map((entry, index) => {
+                  return (
+                    <div
+                      key={entry._id ?? `education-${index}`}
+                      className={styles.editorCard}
+                    >
+                      <div className={styles.editorCardHeader}>
+                        <p className={styles.editorCardTitle}>
+                          Education #{index + 1}
+                        </p>
+                        <button
+                          type="button"
+                          className={styles.deleteAction}
+                          onClick={() =>
+                            removeCollectionItem("education", index)
+                          }
+                        >
+                          Delete
+                        </button>
+                      </div>
+
+                      <div className={styles.fieldGroup}>
+                        <label
+                          className={styles.fieldLabel}
+                          htmlFor={`school-${index}`}
+                        >
+                          School
+                        </label>
+                        <input
+                          id={`school-${index}`}
+                          type="text"
+                          className={styles.fieldInput}
+                          value={entry.school ?? ""}
+                          onChange={(e) => {
+                            updateCollectionItem(
+                              "education",
+                              index,
+                              "school",
+                              e.target.value,
+                            );
+                          }}
+                        />
+                      </div>
+
+                      <div className={styles.fieldGroup}>
+                        <label
+                          className={styles.fieldLabel}
+                          htmlFor={`degree-${index}`}
+                        >
+                          Degree
+                        </label>
+                        <input
+                          id={`degree-${index}`}
+                          type="text"
+                          className={styles.fieldInput}
+                          value={entry.degree ?? ""}
+                          onChange={(e) => {
+                            updateCollectionItem(
+                              "education",
+                              index,
+                              "degree",
+                              e.target.value,
+                            );
+                          }}
+                        />
+                      </div>
+
+                      <div className={styles.fieldGroup}>
+                        <label
+                          className={styles.fieldLabel}
+                          htmlFor={`field-${index}`}
+                        >
+                          Field Of Study
+                        </label>
+                        <input
+                          id={`field-${index}`}
+                          type="text"
+                          className={styles.fieldInput}
+                          value={entry.fieldOfStudy ?? ""}
+                          onChange={(e) => {
+                            updateCollectionItem(
+                              "education",
+                              index,
+                              "fieldOfStudy",
+                              e.target.value,
+                            );
+                          }}
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          {hasPendingChanges && (
+            <button
+              type="button"
+              className={styles.connection__Btn}
+              onClick={saveProfileChanges}
+              disabled={isSavingProfile}
+            >
+              {isSavingProfile ? "Updating..." : "Update Profile"}
+            </button>
+          )}
         </div>
       </DashboardLayout>
     </UserLayout>

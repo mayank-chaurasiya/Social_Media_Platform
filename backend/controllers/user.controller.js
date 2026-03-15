@@ -157,6 +157,22 @@ const getUserAndProfile = async (req, res) => {
 const updateProfileData = async (req, res) => {
   try {
     const { token, ...newProfileData } = req.body;
+    const sanitizeTextValue = (value) =>
+      typeof value === "string" ? value.trim() : "";
+    const sanitizeCollectionEntries = (items, fields) =>
+      (Array.isArray(items) ? items : [])
+        .map((item) => {
+          const normalizedItem = fields.reduce(
+            (accumulator, field) => ({
+              ...accumulator,
+              [field]: sanitizeTextValue(item?.[field]),
+            }),
+            item?._id ? { _id: item._id } : {},
+          );
+
+          return normalizedItem;
+        })
+        .filter((item) => fields.some((field) => item[field] !== ""));
 
     const userProfile = await User.findOne({ token: token });
     if (!userProfile)
@@ -166,7 +182,27 @@ const updateProfileData = async (req, res) => {
       userId: userProfile._id,
     });
 
-    Object.assign(profile_to_update, newProfileData);
+    const normalizedProfileData = { ...newProfileData };
+
+    if ("bio" in newProfileData) {
+      normalizedProfileData.bio = sanitizeTextValue(newProfileData.bio);
+    }
+
+    if ("pastWork" in newProfileData) {
+      normalizedProfileData.pastWork = sanitizeCollectionEntries(
+        newProfileData.pastWork,
+        ["company", "position", "years"],
+      );
+    }
+
+    if ("education" in newProfileData) {
+      normalizedProfileData.education = sanitizeCollectionEntries(
+        newProfileData.education,
+        ["school", "degree", "fieldOfStudy"],
+      );
+    }
+
+    Object.assign(profile_to_update, normalizedProfileData);
     await profile_to_update.save();
 
     return res.json({ message: "Profile updated" });

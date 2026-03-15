@@ -1,6 +1,5 @@
 .container {
   padding: 1.3rem;
-  background: rgb(245, 245, 245);
 }
 
 .backDropContainer {
@@ -63,6 +62,9 @@
 
 .profileDetails__leftBar {
   flex: 0.8;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
 }
 
 .profile__name {
@@ -79,6 +81,10 @@
 
 .profileDetails__rightBar {
   flex: 0.2;
+  padding: 1.2rem;
+  border-radius: 24px;
+  background: linear-gradient(180deg, #ffffff 0%, #f5f9fc 100%);
+  box-shadow: 0 18px 36px rgba(15, 23, 42, 0.08);
 }
 
 .leftBar {
@@ -86,6 +92,71 @@
   width: fit-content;
   align-items: center;
   gap: 1.2rem;
+  flex-wrap: wrap;
+}
+
+.leftBar > input {
+  outline: none;
+  border: 1px solid #d9e3ec;
+  border-radius: 999px;
+  padding-inline: 14px;
+  padding-block: 10px;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 10px 22px rgba(15, 23, 42, 0.06);
+  max-width: 100%;
+}
+
+.name__edit {
+  font-family: "Bellefair", serif;
+  font-weight: 600;
+  font-size: 1.3rem;
+}
+
+.profileEditor {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  max-width: 44rem;
+  padding: 1.2rem;
+  border-radius: 24px;
+  background: linear-gradient(180deg, #ffffff 0%, #f6fbff 100%);
+  box-shadow: 0 20px 40px rgba(15, 23, 42, 0.08);
+}
+
+.fieldLabel {
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #6b7280;
+}
+
+.profileTextarea,
+.fieldInput {
+  width: 100%;
+  border: 1px solid #d9e3ec;
+  border-radius: 16px;
+  padding: 0.9rem 1rem;
+  background: white;
+  font: inherit;
+  color: #16202a;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+}
+
+.profileTextarea {
+  resize: vertical;
+  min-height: 8.5rem;
+  line-height: 1.6;
+}
+
+.leftBar > input:focus,
+.profileTextarea:focus,
+.fieldInput:focus {
+  border-color: #0a66c2;
+  box-shadow: 0 0 0 4px rgba(10, 102, 194, 0.12);
 }
 
 .card {
@@ -111,8 +182,114 @@
   margin-top: 15px;
 }
 
+.editorSection {
+  margin-top: 1.7rem;
+  padding: 1.35rem;
+  border-radius: 26px;
+  background: linear-gradient(180deg, #ffffff 0%, #f6fbff 100%);
+  box-shadow: 0 22px 44px rgba(15, 23, 42, 0.08);
+}
+
 .workHistory__title {
   font-family: "Gloock", serif;
+  font-size: 1.2rem;
+}
+
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.sectionSubtitle {
+  margin-top: 0.45rem;
+  color: #6b7280;
+  max-width: 34rem;
+  line-height: 1.5;
+}
+
+.sectionAction {
+  border: none;
+  border-radius: 999px;
+  padding: 0.75rem 1.15rem;
+  background: #ebf4ff;
+  color: #0a66c2;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease;
+}
+
+.sectionAction:hover {
+  background: #d8ebff;
+  transform: translateY(-1px);
+}
+
+.editorGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
+.editorCard {
+  padding: 1rem;
+  border: 1px solid #e3ecf4;
+  border-radius: 20px;
+  background: white;
+  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.06);
+}
+
+.editorCardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.9rem;
+}
+
+.editorCardTitle {
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.deleteAction {
+  border: none;
+  border-radius: 999px;
+  padding: 0.5rem 0.9rem;
+  background: #fff1f2;
+  color: #be123c;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease;
+}
+
+.deleteAction:hover {
+  background: #ffe4e6;
+  transform: translateY(-1px);
+}
+
+.fieldGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.fieldGroup + .fieldGroup {
+  margin-top: 0.9rem;
+}
+
+.emptyState {
+  padding: 1rem 1.1rem;
+  border: 1px dashed #c7d7e5;
+  border-radius: 18px;
+  background: #fbfdff;
+  color: #6b7280;
+  line-height: 1.5;
 }
 
 .workHistory__container {
@@ -136,4 +313,37 @@
   display: flex;
   align-items: center;
   gap: 0.8rem;
+}
+
+.connection__Btn {
+  margin-top: 1rem;
+  border: none;
+  border-radius: 999px;
+  padding: 0.8rem 1.4rem;
+  background: #0a66c2;
+  color: white;
+  cursor: pointer;
+  font-weight: 600;
+  box-shadow: 0 16px 30px rgba(10, 102, 194, 0.2);
+}
+
+.connection__Btn:disabled {
+  cursor: wait;
+  opacity: 0.7;
+}
+
+@media (max-width: 900px) {
+  .profileDetails__parent {
+    flex-direction: column;
+  }
+
+  .sectionHeader {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .sectionAction,
+  .connection__Btn {
+    width: 100%;
+  }
 }
