@@ -1,5 +1,5 @@
 .container {
-  padding: 1.2rem;
+  padding: 2rem;
 }
 
 .navBar {
@@ -10,6 +10,13 @@
 
 .navBarOptionContainer {
   display: flex;
+}
+
+.nav__heading {
+  cursor: pointer;
+  font-family: "Bona Nova SC", serif;
+  font-weight: bold;
+  font-size: 2.5rem;
 }
 
 .buttonJoin {
@@ -47,4 +54,52 @@
   padding-block: 0.2rem;
   border: none;
   background-color: #fff;
+}
+
+@media (max-width: 900px) {
+  .container {
+    padding: 1.25rem;
+  }
+
+  .navBar {
+    gap: 1rem;
+  }
+
+  .nav__heading {
+    font-size: 2rem;
+  }
+
+  .navbarProfile {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    row-gap: 0.75rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .container {
+    padding: 1rem;
+  }
+
+  .navBar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .navBarOptionContainer {
+    width: 100%;
+  }
+
+  .navbarProfile {
+    width: 100%;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.65rem;
+  }
+
+  .navbarProfile > button,
+  .buttonJoin {
+    width: 100%;
+    text-align: center;
+  }
 }

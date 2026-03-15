@@ -30,3 +30,34 @@
   font-family: "Vibur", cursive;
   font-size: 1.1rem;
 }
+
+@media (max-width: 900px) {
+  .allUserProfile {
+    max-width: 100%;
+  }
+
+  .userCard {
+    width: 100%;
+  }
+
+  .userCard__image {
+    width: 4rem;
+    height: 4rem;
+    object-fit: cover;
+  }
+}
+
+@media (max-width: 540px) {
+  .userCard {
+    padding: 1rem;
+    gap: 0.9rem;
+  }
+
+  .userCard__profileName {
+    font-size: 1.1rem;
+  }
+
+  .userCard__profileUsrName {
+    font-size: 0.95rem;
+  }
+}

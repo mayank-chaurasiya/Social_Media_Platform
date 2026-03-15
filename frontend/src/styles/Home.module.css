@@ -46,3 +46,48 @@
   padding-block: 0.8rem;
   border-radius: 25px;
 }
+
+.mainContainer__Right > img {
+  max-width: 100%;
+  height: auto;
+}
+
+@media (max-width: 900px) {
+  .mainContainer {
+    flex-direction: column;
+    gap: 2rem;
+    height: auto;
+    min-height: 70vh;
+    padding-inline: 1rem;
+    text-align: center;
+  }
+
+  .mainContainer__Left,
+  .mainContainer__Right {
+    width: 100%;
+  }
+
+  .mainContainer__Left > div.buttonJoin {
+    margin-inline: auto;
+  }
+}
+
+@media (max-width: 540px) {
+  .container {
+    padding: 1rem;
+  }
+
+  .mainContainer__Left > p:nth-child(1) {
+    font-size: 2rem;
+  }
+
+  .mainContainer__Left > p:nth-child(2) {
+    font-size: 1.2rem;
+  }
+
+  .mainContainer__Left > div.buttonJoin {
+    width: 100%;
+    text-align: center;
+    font-size: 1.1rem;
+  }
+}

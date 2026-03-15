@@ -74,7 +74,8 @@ const authSlice = createSlice({
         state.isLoading = false;
         state.isError = false;
         state.isSuccess = true;
-        state.message = "Registered successful, Please Log in !";
+        state.loggedIn = true;
+        state.message = "Registration successful";
       })
       .addCase(registerUser.rejected, (state, action) => {
         state.isLoading = false;

@@ -1,8 +1,7 @@
 import { BASE_URL, clientServer } from "@/config";
 import DashboardLayout from "@/layout/DashboardLayout";
 import UserLayout from "@/layout/UserLayout";
-import { useSearchParams } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import styles from "./userProfile.module.css";
 import { useRouter } from "next/router";
 import { useDispatch, useSelector } from "react-redux";
@@ -14,69 +13,36 @@ import {
 } from "@/config/redux/action/authAction";
 
 const ViewProfilePage = ({ userProfile }) => {
-  const searchParameters = useSearchParams();
   const dispatch = useDispatch();
   const router = useRouter();
   const postReducer = useSelector((state) => state.posts);
   const authState = useSelector((state) => state.auth);
-  const [userPosts, setUserPosts] = useState([]);
-  const [isCurrentUserInConnection, setIsCurrentUserInConnection] =
-    useState(false);
-  const [isConnectionNull, setIsConnectionNull] = useState(true);
-
-  const getUserPost = async () => {
-    await dispatch(getAllPosts());
-    await dispatch(
-      getConnectionsRequest({ token: localStorage.getItem("token") }),
-    );
-    await dispatch(
-      getMyConnectionsRequests({ token: localStorage.getItem("token") }),
-    );
-  };
-
-  useEffect(() => {
-    let post = postReducer.posts.filter((post) => {
-      return post.userId.username === router.query.username;
-    });
-    setUserPosts(post);
-  }, [postReducer.posts]);
+  const workHistory = userProfile?.pastWork ?? [];
+  const educationHistory = userProfile?.education ?? [];
+  const userPosts = postReducer.posts.filter(
+    (post) => post.userId.username === router.query.username,
+  );
+  const sentConnection = authState.connections.find(
+    (user) => user.connectionId._id === userProfile.userId._id,
+  );
+  const receivedConnection = authState.connectionRequest.find(
+    (user) => user.userId._id === userProfile.userId._id,
+  );
+  const activeConnection = sentConnection ?? receivedConnection;
+  const isCurrentUserInConnection = Boolean(activeConnection);
+  const isConnectionNull = activeConnection
+    ? !activeConnection.status_accepted
+    : true;
 
   useEffect(() => {
-    console.log(authState.connections, userProfile.userId._id);
-    if (
-      authState.connections.some(
-        (user) => user.connectionId._id === userProfile.userId._id,
-      )
-    ) {
-      setIsCurrentUserInConnection(true);
-      if (
-        authState.connections.find(
-          (user) => user.connectionId._id === userProfile.userId._id,
-        ).status_accepted === true
-      ) {
-        setIsConnectionNull(false);
-      }
+    const token = localStorage.getItem("token");
+    dispatch(getAllPosts());
+
+    if (token) {
+      dispatch(getConnectionsRequest({ token }));
+      dispatch(getMyConnectionsRequests({ token }));
     }
-
-    if (
-      authState.connectionRequest.some(
-        (user) => user.userId._id === userProfile.userId._id,
-      )
-    ) {
-      setIsCurrentUserInConnection(true);
-      if (
-        authState.connectionRequest.find(
-          (user) => user.userId._id === userProfile.userId._id,
-        ).status_accepted === true
-      ) {
-        setIsConnectionNull(false);
-      }
-    }
-  }, [authState.connections, authState.connectionRequest]);
-
-  useEffect(() => {
-    getUserPost();
-  }, []);
+  }, [dispatch]);
 
   return (
     <UserLayout>
@@ -155,38 +121,81 @@ const ViewProfilePage = ({ userProfile }) => {
               </div>
 
               <div className={styles.profileDetails__rightBar}>
-                <h3>Recent Activity</h3>
-                {userPosts.map((post) => {
-                  return (
-                    <div key={post._id} className={styles.postCard}>
-                      <div className={styles.card}>
-                        <div className={styles.card__profileContainer}>
-                          {post.media !== "" ? (
-                            <img src={`${BASE_URL}/${post.media}`} />
-                          ) : (
-                            <div
-                              style={{ width: "3.4rem", height: "3.4rem" }}
-                            ></div>
-                          )}
+                <h3 className={styles.recentActivity__heading}>
+                  Recent Activity
+                </h3>
+                <div className={styles.recentActivityList}>
+                  {userPosts.map((post) => {
+                    return (
+                      <div key={post._id} className={styles.postCard}>
+                        <div className={styles.card}>
+                          <div className={styles.card__profileContainer}>
+                            {post.media !== "" ? (
+                              <img
+                                src={`${BASE_URL}/${post.media}`}
+                                alt="Post media"
+                              />
+                            ) : (
+                              <div
+                                style={{ width: "3.4rem", height: "3.4rem" }}
+                              ></div>
+                            )}
+                          </div>
+                          <p className={styles.recentActivityText}>
+                            {post.body}
+                          </p>
                         </div>
-                        <p>{post.body}</p>
                       </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })}
+                </div>
               </div>
             </div>
           </div>
+
           <div className={styles.workHistory}>
             <p className={styles.workHistory__title}>Work History</p>
             <div className={styles.workHistory__container}>
-              {userProfile.pastWork.map((work, index) => {
+              {workHistory.length === 0 && (
+                <div className={styles.sectionEmpty}>
+                  No work history added yet.
+                </div>
+              )}
+
+              {workHistory.map((work, index) => {
                 return (
                   <div key={index} className={styles.workHistory__Card}>
                     <p className={styles.workHistory__position}>
                       {work.company} - {work.position}
                     </p>
-                    <p>{work.years} years</p>
+                    <p className={styles.workHistory__meta}>{work.years}</p>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className={styles.workHistory}>
+            <p className={styles.workHistory__title}>Education</p>
+            <div className={styles.workHistory__container}>
+              {educationHistory.length === 0 && (
+                <div className={styles.sectionEmpty}>
+                  No education details added yet.
+                </div>
+              )}
+
+              {educationHistory.map((education, index) => {
+                return (
+                  <div key={index} className={styles.workHistory__Card}>
+                    <p className={styles.workHistory__position}>
+                      {education.school}
+                    </p>
+                    <p className={styles.workHistory__meta}>
+                      {education.degree}
+                    </p>
+                    <p className={styles.workHistory__subtext}>
+                      {education.fieldOfStudy}
+                    </p>
                   </div>
                 );
               })}
@@ -199,17 +208,11 @@ const ViewProfilePage = ({ userProfile }) => {
 };
 
 export async function getServerSideProps(context) {
-  console.log("form view");
-  console.log(context.query.username);
-
   const request = await clientServer.get("/user/get_profile_on_username", {
     params: {
       username: context.query.username,
     },
   });
-
-  const response = await request.data;
-  console.log(response);
 
   return { props: { userProfile: request.data.profile } };
 }

@@ -30,11 +30,20 @@ export const registerUser = createAsyncThunk(
   "user/register",
   async (user, thunkAPI) => {
     try {
-      const request = await clientServer.post("/register", {
+      const response = await clientServer.post("/register", {
         name: user.name,
         username: user.username,
         email: user.email,
         password: user.password,
+      });
+
+      if (response.data.token) {
+        localStorage.setItem("token", response.data.token);
+        return thunkAPI.fulfillWithValue(response.data.token);
+      }
+
+      return thunkAPI.rejectWithValue({
+        message: "token not provided",
       });
     } catch (error) {
       return thunkAPI.rejectWithValue(

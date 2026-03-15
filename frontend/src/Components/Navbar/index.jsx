@@ -11,14 +11,14 @@ export const NavBarComponent = () => {
   return (
     <div className={styles.container}>
       <nav className={styles.navBar}>
-        <h1
+        <p
+          className={styles.nav__heading}
           onClick={() => {
             router.push("/");
           }}
-          style={{ cursor: "pointer" }}
         >
-          Pro Connect
-        </h1>
+          Connect
+        </p>
         <div className={styles.navBarOptionContainer}>
           {authState.profileFetched && (
             <div>

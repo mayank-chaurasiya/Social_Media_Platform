@@ -13,8 +13,10 @@ import {
   whatAreMyConnections,
   acceptConnectionRequest,
   getUserProfileWithUsername,
+  deleteProfile,
 } from "../controllers/user.controller.js";
 import multer from "multer";
+import path from "path";
 
 const router = Router();
 
@@ -23,7 +25,8 @@ const storage = multer.diskStorage({
     cb(null, "uploads/");
   },
   filename: (req, file, cb) => {
-    cb(null, file.originalname);
+    const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
+    cb(null, `${uniqueSuffix}${path.extname(file.originalname)}`);
   },
 });
 
@@ -46,5 +49,6 @@ router.route("/user/send_connection_request").post(sendConnectionRequest);
 router.route("/user/get_connection_requests").get(getMyConnectionsRequests);
 router.route("/user/user_connection_request").get(whatAreMyConnections);
 router.route("/user/accept_connection_request").post(acceptConnectionRequest);
+router.route("/delete_profile").delete(deleteProfile);
 
 export default router;

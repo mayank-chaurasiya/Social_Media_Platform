@@ -3,6 +3,7 @@ import styles from "./index.module.css";
 import { useRouter } from "next/router";
 import { setTokenIsThere } from "@/config/redux/reducer/authReducer";
 import { useDispatch, useSelector } from "react-redux";
+import { BASE_URL } from "@/config";
 
 const DashboardLayout = ({ children }) => {
   const router = useRouter();
@@ -81,15 +82,30 @@ const DashboardLayout = ({ children }) => {
           </div>
           <div className={styles.homeContainer__feed}>{children}</div>
           <div className={styles.homeContainer__extra}>
-            <h3>Top Profiles</h3>
+            <h3 className={styles.extraContainer__title}>Top Profiles</h3>
             {authState.all_profiles_fetched &&
               authState.all_users.map((profile) => {
                 return (
                   <div
                     key={profile._id}
                     className={styles.extraContainer__profile}
+                    onClick={() => {
+                      router.push(`/view_profile/${profile.userId.username}`);
+                    }}
                   >
-                    <p>{profile.userId.name}</p>
+                    <img
+                      className={styles.extraContainer__profileImage}
+                      src={`${BASE_URL}/${profile.userId.profilePicture}`}
+                      alt={`${profile.userId.name} profile`}
+                    />
+                    <div className={styles.extraContainer__profileContent}>
+                      <p className={styles.extraContainer__profileName}>
+                        {profile.userId.name}
+                      </p>
+                      <p className={styles.extraContainer__profileUsername}>
+                        @{profile.userId.username}
+                      </p>
+                    </div>
                   </div>
                 );
               })}

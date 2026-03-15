@@ -1,6 +1,8 @@
 import User from "../models/user.model.js";
 import Profile from "../models/profile.model.js";
 import ConnectionRequest from "../models/connections.model.js";
+import Post from "../models/posts.model.js";
+import Comment from "../models/comments.model.js";
 import bcrypt from "bcrypt";
 import crypto from "crypto";
 import PDFDocument from "pdfkit";
@@ -63,6 +65,7 @@ const register = async (req, res) => {
       email,
       password: hashedPassword,
       username,
+      token: crypto.randomBytes(32).toString("hex"),
     });
 
     await newUser.save();
@@ -71,7 +74,7 @@ const register = async (req, res) => {
 
     await profile.save();
 
-    return res.json({ message: "User Created successfully" });
+    return res.json({ token: newUser.token });
   } catch (error) {
     return res.status(500).json({ message: error.message });
   }
@@ -348,6 +351,38 @@ const acceptConnectionRequest = async (req, res) => {
   }
 };
 
+const deleteProfile = async (req, res) => {
+  const token = req.body?.token || req.query?.token;
+
+  try {
+    if (!token) {
+      return res.status(400).json({ message: "Token is required" });
+    }
+
+    const user = await User.findOne({ token }).select("_id");
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    const userPosts = await Post.find({ userId: user._id }).select("_id");
+    const userPostIds = userPosts.map((post) => post._id);
+
+    await Promise.all([
+      Comment.deleteMany({
+        $or: [{ userId: user._id }, { postId: { $in: userPostIds } }],
+      }),
+      ConnectionRequest.deleteMany({
+        $or: [{ userId: user._id }, { connectionId: user._id }],
+      }),
+      Post.deleteMany({ userId: user._id }),
+      Profile.deleteOne({ userId: user._id }),
+      User.deleteOne({ _id: user._id }),
+    ]);
+
+    return res.json({ message: "Profile deleted successfully" });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
+
 export {
   register,
   login,
@@ -362,4 +397,5 @@ export {
   getMyConnectionsRequests,
   whatAreMyConnections,
   acceptConnectionRequest,
+  deleteProfile,
 };

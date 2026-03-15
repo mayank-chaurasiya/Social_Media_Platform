@@ -11,11 +11,10 @@ const DiscoverPage = () => {
   const authState = useSelector((state) => state.auth);
   const dispatch = useDispatch();
   const router = useRouter();
+
   useEffect(() => {
-    if (!authState.all_profiles_fetched) {
-      dispatch(getAllUsers());
-    }
-  }, []);
+    dispatch(getAllUsers());
+  }, [dispatch]);
 
   return (
     <UserLayout>

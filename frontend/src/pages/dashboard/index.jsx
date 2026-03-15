@@ -30,11 +30,9 @@ const Dashboard = () => {
           token: localStorage.getItem("token"),
         }),
       );
-    }
-    if (!authState.all_profiles_fetched) {
       dispatch(getAllUsers());
     }
-  }, [authState.isTokenThere]);
+  }, [authState.isTokenThere, dispatch]);
 
   const profilePicture = authState.user?.userId?.profilePicture;
   const [postContent, setPostContent] = useState("");
@@ -106,12 +104,17 @@ const Dashboard = () => {
               </div>
               <div className={styles.postsContainer}>
                 {postState.posts.map((post) => {
+                  const postProfilePicture = post.userId?.profilePicture
+                    ? `${BASE_URL}/${post.userId.profilePicture}`
+                    : "";
+
                   return (
                     <div key={post._id} className={styles.singleCard}>
                       <div className={styles.singleCard__profileContainer}>
                         <img
-                          src={`${BASE_URL}/${profilePicture || ""}`}
+                          src={postProfilePicture}
                           className={styles.cardProfileImg}
+                          alt={`${post.userId.name} profile`}
                         />
                         <div className={styles.profileContainer__name}>
                           <div className={styles.profileHeader}>
@@ -246,13 +249,19 @@ const Dashboard = () => {
                 {postState.comments.length !== 0 && (
                   <div>
                     {postState.comments.map((comment, index) => {
+                      const commentProfilePicture = comment.userId?.profilePicture
+                        ? `${BASE_URL}/${comment.userId.profilePicture}`
+                        : profilePicture
+                          ? `${BASE_URL}/${profilePicture}`
+                          : "";
+
                       return (
                         <div className={styles.singleComment} key={comment._id}>
                           <div
                             className={styles.singleComment__profileContainer}
                           >
                             <img
-                              src={`${BASE_URL}/${profilePicture}`}
+                              src={commentProfilePicture}
                               alt=""
                               className={styles.singleComment__profilePic}
                             />

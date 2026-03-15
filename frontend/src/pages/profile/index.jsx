@@ -4,8 +4,10 @@ import React, { useEffect, useState } from "react";
 import styles from "./profile.module.css";
 import { useDispatch, useSelector } from "react-redux";
 import { BASE_URL, clientServer } from "@/config";
-import { getAboutUser } from "@/config/redux/action/authAction";
-import { getAllPosts } from "@/config/redux/action/postAction";
+import { getAboutUser, getAllUsers } from "@/config/redux/action/authAction";
+import { deletePost, getAllPosts } from "@/config/redux/action/postAction";
+import { reset } from "@/config/redux/reducer/authReducer";
+import { useRouter } from "next/router";
 
 const PROFILE_SECTION_TEMPLATES = {
   pastWork: {
@@ -46,11 +48,14 @@ const sanitizeCollectionItems = (items, section) =>
     );
 
 const ProfilePage = () => {
+  const router = useRouter();
   const authState = useSelector((state) => state.auth);
   const postState = useSelector((state) => state.posts);
   const dispatch = useDispatch();
   const [draftProfile, setDraftProfile] = useState(null);
   const [isSavingProfile, setIsSavingProfile] = useState(false);
+  const [isDeletingProfile, setIsDeletingProfile] = useState(false);
+  const [deletingPostId, setDeletingPostId] = useState("");
   const originalProfile = authState.user;
 
   useEffect(() => {
@@ -107,17 +112,23 @@ const ProfilePage = () => {
 
   const updateProfilePicture = async (file) => {
     if (!file) return;
+    const token = localStorage.getItem("token");
+    if (!token) return;
 
     const formData = new FormData();
     formData.append("profile_picture", file);
-    formData.append("token", localStorage.getItem("token"));
+    formData.append("token", token);
 
     await clientServer.post("/update_profile_picture", formData, {
       headers: {
         "Content-Type": "multipart/form-data",
       },
     });
-    dispatch(getAboutUser({ token: localStorage.getItem("token") }));
+    await Promise.all([
+      dispatch(getAboutUser({ token })),
+      dispatch(getAllUsers()),
+      dispatch(getAllPosts()),
+    ]);
   };
 
   const updateProfileData = (profileUpdater) => {
@@ -185,11 +196,58 @@ const ProfilePage = () => {
       }
 
       await Promise.all(requests);
-      await dispatch(getAboutUser({ token }));
+      await Promise.all([
+        dispatch(getAboutUser({ token })),
+        dispatch(getAllUsers()),
+        dispatch(getAllPosts()),
+      ]);
     } catch (error) {
       console.error("Unable to update profile", error);
     } finally {
       setIsSavingProfile(false);
+    }
+  };
+
+  const deleteUserProfile = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
+
+    const shouldDelete = window.confirm(
+      "Delete your profile, posts, comments, and connections permanently?",
+    );
+
+    if (!shouldDelete) return;
+
+    try {
+      setIsDeletingProfile(true);
+      await clientServer.delete("/delete_profile", {
+        data: { token },
+      });
+      localStorage.removeItem("token");
+      dispatch(reset());
+      router.replace("/login");
+    } catch (error) {
+      console.error("Unable to delete profile", error);
+    } finally {
+      setIsDeletingProfile(false);
+    }
+  };
+
+  const deleteUserPost = async (postId) => {
+    const shouldDelete = window.confirm(
+      "Delete this post permanently from your profile?",
+    );
+
+    if (!shouldDelete) return;
+
+    try {
+      setDeletingPostId(postId);
+      await dispatch(deletePost({ post_id: postId }));
+      await dispatch(getAllPosts());
+    } catch (error) {
+      console.error("Unable to delete post", error);
+    } finally {
+      setDeletingPostId("");
     }
   };
 
@@ -247,7 +305,7 @@ const ProfilePage = () => {
 
                 <div className={styles.profileEditor}>
                   <label className={styles.fieldLabel} htmlFor="profileBio">
-                    Bio
+                    <p className={styles.bio__heading}>Bio</p>
                   </label>
                   <textarea
                     id="profileBio"
@@ -266,28 +324,32 @@ const ProfilePage = () => {
               </div>
 
               <div className={styles.profileDetails__rightBar}>
-                <h3>Recent Activity</h3>
-                {userPosts.map((post) => {
-                  return (
-                    <div key={post._id} className={styles.postCard}>
-                      <div className={styles.card}>
-                        <div className={styles.card__profileContainer}>
-                          {post.media !== "" ? (
-                            <img
-                              src={`${BASE_URL}/${post.media}`}
-                              alt="Post media"
-                            />
-                          ) : (
-                            <div
-                              style={{ width: "3.4rem", height: "3.4rem" }}
-                            ></div>
-                          )}
+                <p className={styles.recentActivity__heading}>Recent 's</p>
+                <div className={styles.recentActivityList}>
+                  {userPosts.map((post) => {
+                    return (
+                      <div key={post._id} className={styles.postCard}>
+                        <div className={styles.card}>
+                          <div className={styles.card__profileContainer}>
+                            {post.media !== "" ? (
+                              <img
+                                src={`${BASE_URL}/${post.media}`}
+                                alt="Post media"
+                              />
+                            ) : (
+                              <div
+                                style={{ width: "3.4rem", height: "3.4rem" }}
+                              ></div>
+                            )}
+                          </div>
+                          <p className={styles.recentActivityText}>
+                            {post.body}
+                          </p>
                         </div>
-                        <p>{post.body}</p>
                       </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })}
+                </div>
               </div>
             </div>
           </div>
@@ -530,16 +592,69 @@ const ProfilePage = () => {
             )}
           </div>
 
-          {hasPendingChanges && (
+          <div className={styles.editorSection}>
+            <div className={styles.sectionHeader}>
+              <div>
+                <p className={styles.workHistory__title}>Your Posts</p>
+                <p className={styles.sectionSubtitle}>
+                  All posts you have shared on the platform.
+                </p>
+              </div>
+            </div>
+
+            {userPosts.length === 0 ? (
+              <div className={styles.emptyState}>
+                You have not posted anything yet.
+              </div>
+            ) : (
+              <div className={styles.postsGrid}>
+                {userPosts.map((post) => {
+                  return (
+                    <div key={post._id} className={styles.postCardLarge}>
+                      <button
+                        type="button"
+                        className={styles.postDeleteAction}
+                        onClick={() => deleteUserPost(post._id)}
+                        disabled={deletingPostId === post._id}
+                      >
+                        {deletingPostId === post._id ? "Deleting..." : "Delete"}
+                      </button>
+                      {post.media !== "" && (
+                        <img
+                          className={styles.postCardLarge__media}
+                          src={`${BASE_URL}/${post.media}`}
+                          alt="Post media"
+                        />
+                      )}
+                      <p className={styles.postCardLarge__body}>{post.body}</p>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          <div className={styles.profileActions}>
+            {hasPendingChanges && (
+              <button
+                type="button"
+                className={styles.connection__Btn}
+                onClick={saveProfileChanges}
+                disabled={isSavingProfile || isDeletingProfile}
+              >
+                {isSavingProfile ? "Updating..." : "Update Profile"}
+              </button>
+            )}
+
             <button
               type="button"
-              className={styles.connection__Btn}
-              onClick={saveProfileChanges}
-              disabled={isSavingProfile}
+              className={styles.deleteProfileBtn}
+              onClick={deleteUserProfile}
+              disabled={isDeletingProfile || isSavingProfile}
             >
-              {isSavingProfile ? "Updating..." : "Update Profile"}
+              {isDeletingProfile ? "Deleting..." : "Delete Profile"}
             </button>
-          )}
+          </div>
         </div>
       </DashboardLayout>
     </UserLayout>
