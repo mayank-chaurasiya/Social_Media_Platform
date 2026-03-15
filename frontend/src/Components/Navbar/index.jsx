@@ -24,7 +24,13 @@ export const NavBarComponent = () => {
             <div>
               <div className={styles.navbarProfile}>
                 <p>Hey, {authState.user?.userId?.name ?? "User"} !</p>
-                <p>Profile</p>
+                <p
+                  onClick={() => {
+                    router.push("/profile");
+                  }}
+                >
+                  Profile
+                </p>
                 <button
                   onClick={() => {
                     localStorage.removeItem("token");
